@@ -135,22 +135,7 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-  const user = CONFIG.USERS.find(u => u.password === password);
-  if (!user) return res.status(401).json({ error: 'Senha incorreta.' });
 
-  const token = jwt.sign({ userId: user.id }, CONFIG.JWT_SECRET, { expiresIn: '30d' });
-
-  res.json({
-    token,
-    user: {
-      id:    user.id,
-      name:  user.name,
-      plan:  user.plan,
-      usage: getUserUsage(user.id),
-      limit: user.plan === 'basic' ? CONFIG.BASIC_MONTHLY_LIMIT : null,
-    }
-  });
-});
 
 // ── STATUS DO USUÁRIO ─────────────────────────────────────
 app.get('/api/me', authMiddleware, (req, res) => {
