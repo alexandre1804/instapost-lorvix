@@ -369,7 +369,17 @@ main{padding:16px 18px;display:flex;flex-direction:column;gap:0}
   <div><div class="lbl">Tema livre (opcional)</div>
     <textarea class="inp" id="temaPost" rows="3" placeholder="Ex: como o bot responde clientes às 2h da manhã..."></textarea>
   </div>
-  <button class="btn-gen" id="btnPost" onclick="gerarPost()"><span>✦</span><span>Gerar Post + Imagem</span></button>
+  <div><div class="lbl">Descreva a imagem (opcional)</div><textarea class="inp" id="imgPromptPost" rows="2" placeholder="Ex: empresário no celular à noite, luz azul... (vazio = IA decide)"></textarea></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:var(--text)">Gerar imagem com IA</div>
+      <div style="font-size:.68rem;color:var(--t3);margin-top:2px">Desative para gerar só legenda e hashtags</div>
+    </div>
+    <div id="imgToggle" onclick="toggleImg()" style="width:44px;height:24px;border-radius:100px;background:var(--accent);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+      <div id="imgToggleKnob" style="width:18px;height:18px;border-radius:50%;background:#000;position:absolute;top:3px;right:3px;transition:all .2s"></div>
+    </div>
+  </div>
+  <button class="btn-gen" id="btnPost" onclick="gerarPost()"><span>✦</span><span id="btnPostLabel">Gerar Post + Imagem</span></button>
   <div class="prog-wrap" id="progPost"><div class="prog-lbl" id="progPostLbl">Gerando...</div><div class="prog-bg"><div class="prog-fill" id="progPostFill"></div></div></div>
   <div class="erro" id="erroPost"></div>
   <div class="res-wrap" id="resPost">
@@ -418,6 +428,7 @@ main{padding:16px 18px;display:flex;flex-direction:column;gap:0}
   <div><div class="lbl">Tema do carrossel</div>
     <textarea class="inp" id="temaCarousel" rows="3" placeholder="Ex: 5 motivos para ter um agente de IA no seu negócio..."></textarea>
   </div>
+  <div><div class="lbl">Descreva as imagens (opcional)</div><textarea class="inp" id="imgPromptCarousel" rows="2" placeholder="Ex: ambiente de barbearia, cores escuras, estilo premium... (vazio = IA decide)"></textarea></div>
   <button class="btn-gen" id="btnCarousel" onclick="gerarCarousel()"><span>✦</span><span>Gerar Carrossel (6 slides)</span></button>
   <div class="prog-wrap" id="progCarousel"><div class="prog-lbl" id="progCarouselLbl">Planejando...</div><div class="prog-bg"><div class="prog-fill" id="progCarouselFill"></div></div></div>
   <div class="erro" id="erroCarousel"></div>
@@ -447,7 +458,7 @@ const API = 'https://instapost.lorvix.com.br';
 let token = localStorage.getItem('ip_token') || '';
 let currentUser = null;
 const proKeys = {
-  texto:  { provider: 'anthropic', key: '' },
+  texto:  { provider: 'openai', key: '' },
   imagem: { provider: 'replicate', key: '' }
 };
 const S = {
@@ -618,8 +629,21 @@ async function apiImage(prompt, w, h) {
 }
 
 // ── GERAR POST ─────────────────────────────────
+let gerarImgAtivo = true;
+function toggleImg() {
+  gerarImgAtivo = !gerarImgAtivo;
+  const toggle = document.getElementById('imgToggle');
+  const knob   = document.getElementById('imgToggleKnob');
+  const label  = document.getElementById('btnPostLabel');
+  toggle.style.background = gerarImgAtivo ? 'var(--accent)' : 'var(--s3)';
+  knob.style.right = gerarImgAtivo ? '3px' : 'auto';
+  knob.style.left  = gerarImgAtivo ? 'auto' : '3px';
+  label.textContent = gerarImgAtivo ? 'Gerar Post + Imagem' : 'Gerar Só Legenda';
+}
+
 async function gerarPost(){
   const tema=document.getElementById('temaPost').value.trim();
+  const imgPromptPost=document.getElementById('imgPromptPost').value.trim();
   const btn=document.getElementById('btnPost');
   document.getElementById('erroPost').classList.remove('on');
   document.getElementById('resPost').classList.remove('on');
@@ -633,15 +657,20 @@ Crie conteúdo:
 - Tom: ${S.post.tom}
 ${tema?'- Tema: '+tema:''}
 Retorne APENAS JSON puro sem markdown:
-{"legenda":"legenda português emojis gancho forte valor real CTA. Tom: ${S.post.tom}. Máx 280 palavras.","hashtags":["20 hashtags sem #"],"image_prompt":"prompt inglês para imagem IA estilo: ${S.post.estilo}. Cena impactante nicho e tema. SEM texto na imagem. Fotorrealista ultra detalhado."}`);
+{"legenda":"legenda português emojis gancho forte valor real CTA. Tom: ${S.post.tom}. Máx 280 palavras.","hashtags":["20 hashtags sem #"],"image_prompt":"${imgPromptPost ? imgPromptPost + ", estilo: ${S.post.estilo}, fotorrealista ultra detalhado, SEM texto na imagem" : "prompt inglês para imagem IA estilo: ${S.post.estilo}. Cena impactante nicho e tema. SEM texto na imagem. Fotorrealista ultra detalhado."}"}`);
     S.post.legenda=json.legenda; S.post.hashtags=json.hashtags;
-    setProg('Post',45,'🎨 Gerando imagem...');
-    const url=await apiImage(json.image_prompt,S.post.fmt.w,S.post.fmt.h);
-    document.getElementById('imgPost').src=url;
-    document.getElementById('dlPost').href=url;
+    // Imagem só se toggle ativo
+    if(gerarImgAtivo){
+      setProg('Post',45,'🎨 Gerando imagem...');
+      const url=await apiImage(json.image_prompt,S.post.fmt.w,S.post.fmt.h);
+      document.getElementById('imgPost').src=url;
+      document.getElementById('dlPost').href=url;
+      document.getElementById('imgPost').parentElement.style.display='';
+    } else {
+      document.getElementById('imgPost').parentElement.style.display='none';
+    }
     document.getElementById('lgPost').textContent=json.legenda;
     renderHtags('htPost',json.hashtags);
-    // Atualiza uso
     if(currentUser.plan==='basic'){
       currentUser.usage++;
       document.getElementById('usoNum').textContent=currentUser.usage;
@@ -660,6 +689,7 @@ Retorne APENAS JSON puro sem markdown:
 // ── GERAR CARROSSEL ────────────────────────────
 async function gerarCarousel(){
   const tema=document.getElementById('temaCarousel').value.trim();
+  const imgPromptCarousel=document.getElementById('imgPromptCarousel').value.trim();
   if(!tema){showErro('erroCarousel','Digite um tema para o carrossel.');return;}
   const btn=document.getElementById('btnCarousel');
   document.getElementById('erroCarousel').classList.remove('on');
@@ -673,7 +703,7 @@ Crie carrossel 6 slides:
 - Tema: ${tema}
 - Tom: ${S.carousel.tom}
 Retorne APENAS JSON puro sem markdown:
-{"slides":[{"titulo":"título impactante máx 8 palavras","texto":"apoio máx 18 palavras","image_prompt":"prompt inglês estilo: ${S.carousel.estilo}. Cena slide. SEM texto. Ultra qualidade."}],"legenda":"legenda carrossel tom: ${S.carousel.tom}, gancho, valor, CTA. Máx 280 palavras.","hashtags":["20 hashtags sem #"]}`);
+{"slides":[{"titulo":"título impactante máx 8 palavras","texto":"apoio máx 18 palavras","image_prompt":"prompt em inglês estilo: ${S.carousel.estilo}. ${imgPromptCarousel ? imgPromptCarousel + '.' : 'Cena de fundo relacionada ao tema.'} O titulo e o texto do slide devem aparecer em destaque na imagem com tipografia moderna bold e legível. Ultra qualidade."}],"legenda":"legenda carrossel tom: ${S.carousel.tom}, gancho, valor, CTA. Máx 280 palavras.","hashtags":["20 hashtags sem #"]}`);
     S.carousel.legenda=json.legenda; S.carousel.hashtags=json.hashtags;
     const grid=document.getElementById('cgrid'); grid.innerHTML='';
     json.slides.forEach((_,i)=>{const d=document.createElement('div');d.className='cslide';d.id='sl-'+i;d.innerHTML='<div class="cload"><div class="cspinner"></div></div>';grid.appendChild(d);});
@@ -703,8 +733,8 @@ function showErro(id,msg){const e=document.getElementById(id);e.textContent='⚠
 function cp(id){let txt='';if(id==='htPost')txt=S.post.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ');else if(id==='htCarousel')txt=S.carousel.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ');else txt=document.getElementById(id).textContent;navigator.clipboard.writeText(txt).then(()=>showToast('Copiado ✓'));}
 function cpTudoPost(){navigator.clipboard.writeText(S.post.legenda+'\n\n'+S.post.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ')).then(()=>showToast('Tudo copiado ✓'));}
 function cpTudoCarousel(){navigator.clipboard.writeText(S.carousel.legenda+'\n\n'+S.carousel.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ')).then(()=>showToast('Tudo copiado ✓'));}
-function resetPost(){document.getElementById('resPost').classList.remove('on');document.getElementById('temaPost').value='';window.scrollTo({top:0,behavior:'smooth'});}
-function resetCarousel(){document.getElementById('resCarousel').classList.remove('on');document.getElementById('temaCarousel').value='';window.scrollTo({top:0,behavior:'smooth'});}
+function resetPost(){document.getElementById('resPost').classList.remove('on');document.getElementById('temaPost').value='';document.getElementById('imgPromptPost').value='';window.scrollTo({top:0,behavior:'smooth'});}
+function resetCarousel(){document.getElementById('resCarousel').classList.remove('on');document.getElementById('temaCarousel').value='';document.getElementById('imgPromptCarousel').value='';window.scrollTo({top:0,behavior:'smooth'});}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
 
 
