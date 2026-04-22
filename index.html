@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="InstaPost AI">
+<meta name="theme-color" content="#080808">
+<title>InstaPost AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;--s1:#111;--s2:#181818;--s3:#222;
+  --border:#2c2c2c;--border2:#3a3a3a;
+  --accent:#c8ff00;--adim:rgba(200,255,0,.08);
+  --orange:#ff6b35;--odim:rgba(255,107,53,.08);
+  --blue:#4fc3f7;--bdim:rgba(79,195,247,.08);
+  --purple:#b388ff;--pdim:rgba(179,136,255,.08);
+  --text:#efefef;--t2:#999;--t3:#555;
+  --r:14px;--r2:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;padding-bottom:52px}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;z-index:100;gap:0}
+.login-screen.hidden{display:none}
+.login-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;letter-spacing:-1px;margin-bottom:6px}
+.login-logo em{color:var(--accent);font-style:normal}
+.login-tagline{font-size:.85rem;color:var(--t3);margin-bottom:40px;text-align:center}
+.login-box{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
+.login-label{font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+.login-input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:1rem;color:var(--text);outline:none;transition:border .15s;-webkit-text-security:disc}
+.login-input:focus{border-color:var(--accent)}
+.login-input::placeholder{color:var(--t3)}
+.login-btn{width:100%;padding:16px;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;border:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+.login-btn:active{transform:scale(.97)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* LOGIN LINKS */
+.login-links{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px}
+.login-link{background:none;border:none;color:var(--t3);font-size:.78rem;cursor:pointer;padding:4px;text-decoration:underline;font-family:'DM Sans',sans-serif}
+.login-link:hover{color:var(--t2)}
+.login-error{font-size:.82rem;color:#ff8080;text-align:center;min-height:20px}
+
+/* ── HEADER ── */
+.hdr{padding:16px 18px 0;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.5px}
+.logo em{color:var(--accent);font-style:normal}
+.user-bar{display:flex;align-items:center;gap:8px}
+.plan-badge{font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:100px;letter-spacing:.5px;text-transform:uppercase}
+.plan-badge.basic{background:var(--s3);color:var(--t2);border:1px solid var(--border)}
+.plan-badge.pro{background:var(--adim);color:var(--accent);border:1px solid rgba(200,255,0,.3)}
+.plan-badge.admin{background:var(--odim);color:var(--orange);border:1px solid rgba(255,107,53,.3)}
+.logout-btn{font-size:.7rem;color:var(--t3);background:none;border:none;cursor:pointer;padding:4px 6px}
+
+/* ── USO BAR ── */
+.uso-bar{margin:10px 18px 0;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.uso-info{display:flex;flex-direction:column;gap:2px;flex:1}
+.uso-label{font-size:.65rem;color:var(--t3);font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.uso-nums{font-size:.82rem;color:var(--t2)}
+.uso-nums b{color:var(--text)}
+.uso-track{height:4px;background:var(--s3);border-radius:100px;overflow:hidden;margin-top:4px}
+.uso-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .3s}
+.uso-fill.warn{background:var(--orange)}
+.upgrade-btn{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;background:var(--adim);color:var(--accent);border:1px solid rgba(200,255,0,.25);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+
+/* ── PRO KEY SECTION ── */
+.pro-keys{margin:10px 18px 0;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:none}
+.pro-keys.show{display:block}
+.pro-keys-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none}
+.pro-keys-title{font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--t2)}
+.pro-keys-body{padding:12px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.pro-keys-chevron{font-size:.7rem;color:var(--t3);transition:transform .2s}
+.pro-keys-chevron.open{transform:rotate(180deg)}
+
+.key-group{display:flex;flex-direction:column;gap:6px}
+.key-group-lbl{font-family:'Syne',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.pvdr-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.pvdr-btn{font-size:.73rem;font-weight:500;padding:5px 10px;border-radius:100px;border:1px solid var(--border);background:var(--s2);color:var(--t2);cursor:pointer;transition:all .15s;user-select:none}
+.pvdr-btn.on{border-color:var(--accent);background:var(--adim);color:var(--accent)}
+.key-row{display:flex;gap:7px}
+.key-inp{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.78rem;color:var(--t2);outline:none;min-width:0;transition:border .15s}
+.key-inp:focus{border-color:var(--accent)}
+.key-inp::placeholder{color:var(--t3)}
+.key-save{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;background:var(--accent);color:#000;border:none;border-radius:8px;padding:7px 12px;cursor:pointer}
+.key-ok{font-size:.75rem;color:var(--accent);font-weight:500}
+.key-clear{font-size:.7rem;color:var(--t3);background:none;border:none;cursor:pointer;text-decoration:underline;margin-left:6px}
+
+/* ── TABS ── */
+.tabs{display:flex;margin:14px 18px 0;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:4px}
+.tab{flex:1;text-align:center;padding:9px 4px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--t3);cursor:pointer;border-radius:10px;transition:all .2s}
+.tab.on{background:var(--s3);color:var(--text)}
+
+main{padding:16px 18px;display:flex;flex-direction:column;gap:0}
+.panel{display:none;flex-direction:column;gap:15px}.panel.on{display:flex}
+.lbl{font-family:'Syne',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:.79rem;font-weight:500;padding:7px 12px;border-radius:100px;border:1px solid var(--border);background:var(--s2);color:var(--t2);cursor:pointer;transition:all .15s;white-space:nowrap;user-select:none}
+.pill.on{border-color:var(--accent);background:var(--adim);color:var(--accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;cursor:pointer;transition:all .15s;user-select:none}
+.card.on-o{border-color:var(--orange);background:var(--odim)}
+.card.on-p{border-color:var(--purple);background:var(--pdim)}
+.card.on-a{border-color:var(--accent);background:var(--adim)}
+.card.on-b{border-color:var(--blue);background:var(--bdim)}
+.card-ic{font-size:1.15rem;margin-bottom:3px}
+.card-name{font-family:'Syne',sans-serif;font-size:.77rem;font-weight:700;color:var(--t2)}
+.card-sub{font-size:.67rem;color:var(--t3);margin-top:2px;line-height:1.3}
+.card.on-o .card-name{color:var(--orange)}.card.on-p .card-name{color:var(--purple)}
+.card.on-a .card-name{color:var(--accent)}.card.on-b .card-name{color:var(--blue)}
+.card.on-p .card-sub{color:rgba(179,136,255,.6)}.card.on-o .card-sub{color:rgba(255,107,53,.55)}
+.fmt-row{display:flex;gap:7px}
+.fmt-btn{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;user-select:none}
+.fmt-btn.on{border-color:var(--blue);background:var(--bdim)}
+.fmt-ic{font-size:1.3rem;margin-bottom:4px}
+.fmt-lbl{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:var(--t2)}
+.fmt-sub{font-size:.62rem;color:var(--t3);margin-top:1px}
+.fmt-btn.on .fmt-lbl{color:var(--blue)}
+.inp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--text);resize:none;outline:none;transition:border .15s;line-height:1.5}
+.inp:focus{border-color:var(--accent)}.inp::placeholder{color:var(--t3)}
+.btn-gen{width:100%;padding:17px;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;border:none;border-radius:var(--r);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-gen:active{transform:scale(.97)}.btn-gen:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.spinner{width:17px;height:17px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prog-wrap{display:none;flex-direction:column;gap:8px}.prog-wrap.on{display:flex}
+.prog-lbl{font-size:.78rem;color:var(--t2);text-align:center}
+.prog-bg{height:3px;background:var(--s3);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:100px;transition:width .5s ease;width:0%}
+.erro{background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);border-radius:var(--r);padding:12px 14px;font-size:.82rem;color:#ff8080;display:none;line-height:1.5}
+.erro.on{display:block}
+.res-wrap{display:none;flex-direction:column;gap:12px}.res-wrap.on{display:flex;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.img-res{border-radius:var(--r2);overflow:hidden;position:relative;background:var(--s2)}
+.img-res img{width:100%;display:block}
+.img-ov{position:absolute;bottom:0;left:0;right:0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;justify-content:flex-end}
+.btn-dl{background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:.74rem;border:none;border-radius:100px;padding:7px 14px;cursor:pointer;text-decoration:none;display:inline-block}
+.txt-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.txt-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
+.txt-title{font-family:'Syne',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.btn-cp{background:none;border:none;color:var(--accent);font-size:.75rem;font-weight:500;cursor:pointer;padding:3px 7px;border-radius:6px;transition:background .15s}
+.btn-cp:active{background:var(--adim)}
+.txt-body{padding:12px 14px;font-size:.87rem;line-height:1.65;color:#ccc;white-space:pre-wrap}
+.htags{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
+.htag{font-size:.74rem;padding:4px 9px;background:var(--adim);border:1px solid rgba(200,255,0,.18);border-radius:100px;color:var(--accent)}
+.btn-all{width:100%;padding:14px;background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-weight:700;font-size:.87rem;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .15s}
+.btn-all:active{background:var(--s3)}
+.btn-reset{width:100%;padding:11px;background:none;color:var(--t3);font-family:'DM Sans',sans-serif;font-size:.82rem;border:1px dashed var(--border);border-radius:var(--r);cursor:pointer}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cslide{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative}
+.cslide img{width:100%;display:block}
+.cnum{position:absolute;top:7px;left:7px;background:rgba(0,0,0,.7);color:var(--accent);font-family:'Syne',sans-serif;font-size:.62rem;font-weight:700;padding:3px 7px;border-radius:100px}
+.cdl{position:absolute;top:7px;right:7px;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-size:.62rem;font-weight:700;border:none;border-radius:100px;padding:4px 9px;cursor:pointer;text-decoration:none;display:inline-block}
+.cload{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--s3);min-height:130px}
+.cspinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.hr{height:1px;background:var(--border)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;padding:9px 18px;border-radius:100px;opacity:0;transition:all .28s ease;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-logo">Insta<em>Post</em> AI</div>
+  <div class="login-tagline">Conteúdo profissional para Instagram com IA</div>
+
+  <!-- TELA: LOGIN -->
+  <div class="login-box" id="boxLogin">
+    <div><div class="login-label">Usuário</div>
+      <input class="login-input" type="text" id="loginUser" placeholder="seu usuário..." autocomplete="username" autocapitalize="none" spellcheck="false" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    </div>
+    <div><div class="login-label">Senha</div>
+      <input class="login-input" type="password" id="loginPass" placeholder="sua senha..." autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()"><span>Entrar</span></button>
+    <div class="login-error" id="loginErr"></div>
+    <div class="login-links">
+      <button class="login-link" onclick="showBox('boxForgot')">Esqueci a senha</button>
+      <span>·</span>
+      <button class="login-link" onclick="showBox('boxRegister')">Criar conta</button>
+    </div>
+  </div>
+
+  <!-- TELA: CADASTRO -->
+  <div class="login-box" id="boxRegister" style="display:none">
+    <div><div class="login-label">Nome completo</div>
+      <input class="login-input" type="text" id="regName" placeholder="Seu nome..." autocomplete="name">
+    </div>
+    <div><div class="login-label">Usuário</div>
+      <input class="login-input" type="text" id="regUser" placeholder="sem espaços, ex: joao123" autocomplete="username" autocapitalize="none" spellcheck="false">
+    </div>
+    <div><div class="login-label">E-mail</div>
+      <input class="login-input" type="email" id="regEmail" placeholder="seu@email.com" autocomplete="email">
+    </div>
+    <div><div class="login-label">Senha</div>
+      <input class="login-input" type="password" id="regPass" placeholder="mínimo 6 caracteres" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+    </div>
+    <button class="login-btn" id="regBtn" onclick="doRegister()"><span>Criar conta</span></button>
+    <div class="login-error" id="regErr"></div>
+    <div class="login-links">
+      <button class="login-link" onclick="showBox('boxLogin')">← Voltar ao login</button>
+    </div>
+  </div>
+
+  <!-- TELA: ESQUECI SENHA — passo 1 -->
+  <div class="login-box" id="boxForgot" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:4px">Recuperar senha</div>
+    <div style="font-size:.78rem;color:var(--t3);margin-bottom:16px">Informe seu usuário e e-mail cadastrado.</div>
+    <div><div class="login-label">Usuário</div>
+      <input class="login-input" type="text" id="fgUser" placeholder="seu usuário..." autocapitalize="none" spellcheck="false">
+    </div>
+    <div><div class="login-label">E-mail</div>
+      <input class="login-input" type="email" id="fgEmail" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doForgotVerify()">
+    </div>
+    <button class="login-btn" id="fgBtn" onclick="doForgotVerify()"><span>Verificar</span></button>
+    <div class="login-error" id="fgErr"></div>
+    <div class="login-links">
+      <button class="login-link" onclick="showBox('boxLogin')">← Voltar ao login</button>
+    </div>
+  </div>
+
+  <!-- TELA: ESQUECI SENHA — passo 2 -->
+  <div class="login-box" id="boxReset" style="display:none">
+    <div style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:4px">Nova senha</div>
+    <div style="font-size:.78rem;color:var(--t3);margin-bottom:16px">Identidade confirmada! Defina sua nova senha.</div>
+    <input type="hidden" id="resetUserId">
+    <div><div class="login-label">Nova senha</div>
+      <input class="login-input" type="password" id="resetPass" placeholder="mínimo 6 caracteres" autocomplete="new-password">
+    </div>
+    <div><div class="login-label">Confirme a senha</div>
+      <input class="login-input" type="password" id="resetPass2" placeholder="repita a senha" onkeydown="if(event.key==='Enter')doReset()">
+    </div>
+    <button class="login-btn" id="resetBtn" onclick="doReset()"><span>Salvar nova senha</span></button>
+    <div class="login-error" id="resetErr"></div>
+  </div>
+
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<div id="appWrap" style="display:none">
+
+<div class="hdr">
+  <div class="logo">Insta<em>Post</em> AI</div>
+  <div class="user-bar">
+    <span class="plan-badge" id="planBadge">basic</span>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<!-- BARRA DE USO (plano basic) -->
+<div class="uso-bar" id="usoBar" style="display:none">
+  <div class="uso-info">
+    <div class="uso-label">Posts este mês</div>
+    <div class="uso-nums"><b id="usoNum">0</b> / <span id="usoLim">30</span></div>
+    <div class="uso-track"><div class="uso-fill" id="usoFill" style="width:0%"></div></div>
+  </div>
+  <button class="upgrade-btn" onclick="showToast('Entre em contato para fazer upgrade!')">Upgrade Pro</button>
+</div>
+
+<!-- CHAVES PRO -->
+<div class="pro-keys" id="proKeysSection">
+  <div class="pro-keys-hd" onclick="toggleProKeys()">
+    <span class="pro-keys-title">🔑 Suas chaves de API (Plano Pro)</span>
+    <span class="pro-keys-chevron" id="proKeysChev">▾</span>
+  </div>
+  <div class="pro-keys-body" id="proKeysBody" style="display:none">
+
+    <div class="key-group">
+      <div class="key-group-lbl">IA de Texto</div>
+      <div class="pvdr-row" id="pvdrTexto">
+        <div class="pvdr-btn on" data-p="anthropic" onclick="setPvdr('texto','anthropic',this)">🟢 Claude</div>
+        <div class="pvdr-btn" data-p="openai" onclick="setPvdr('texto','openai',this)">⚫ GPT-4o</div>
+        <div class="pvdr-btn" data-p="google" onclick="setPvdr('texto','google',this)">🔵 Gemini</div>
+      </div>
+      <div id="keyTextoArea">
+        <div class="key-row">
+          <input class="key-inp" type="password" id="keyTextoInp" placeholder="Cole sua key de texto..." autocomplete="off">
+          <button class="key-save" onclick="salvarProKey('texto')">Salvar</button>
+        </div>
+      </div>
+      <div id="keyTextoOk" style="display:none">
+        <span class="key-ok" id="keyTextoOkTxt">✓ Configurada</span>
+        <button class="key-clear" onclick="limparProKey('texto')">trocar</button>
+      </div>
+    </div>
+
+    <div class="key-group">
+      <div class="key-group-lbl">IA de Imagem</div>
+      <div class="pvdr-row" id="pvdrImagem">
+        <div class="pvdr-btn on" data-p="replicate" onclick="setPvdr('imagem','replicate',this)">⚡ Replicate</div>
+        <div class="pvdr-btn" data-p="openai_img" onclick="setPvdr('imagem','openai_img',this)">⚫ DALL-E 3</div>
+      </div>
+      <div id="keyImagemArea">
+        <div class="key-row">
+          <input class="key-inp" type="password" id="keyImagemInp" placeholder="Cole sua key de imagem..." autocomplete="off">
+          <button class="key-save" onclick="salvarProKey('imagem')">Salvar</button>
+        </div>
+      </div>
+      <div id="keyImagemOk" style="display:none">
+        <span class="key-ok" id="keyImagemOkTxt">✓ Configurada</span>
+        <button class="key-clear" onclick="limparProKey('imagem')">trocar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="setTab('post')">📸 Post / Reel</div>
+  <div class="tab" onclick="setTab('carousel')">🎠 Carrossel</div>
+</div>
+
+<main>
+
+<!-- POST / REEL -->
+<div class="panel on" id="panel-post">
+  <div><div class="lbl">Nicho</div>
+    <div class="pills" id="pNicho">
+      <div class="pill on" data-v="Agente de Atendimento 24h por IA no WhatsApp">🤖 Atend. IA</div>
+      <div class="pill" data-v="Barbearia moderna">✂️ Barbearia</div>
+      <div class="pill" data-v="Salão de Beleza e Estética">💆 Beleza</div>
+      <div class="pill" data-v="Clínica Odontológica">🦷 Odonto</div>
+      <div class="pill" data-v="Restaurante">🍽️ Restaurante</div>
+      <div class="pill" data-v="Oficina Mecânica">🔧 Oficina</div>
+      <div class="pill" data-v="Imobiliária">🏠 Imobiliária</div>
+    </div>
+  </div>
+  <div><div class="lbl">Tipo de post</div>
+    <div class="grid2" id="pTipo">
+      <div class="card on-o" data-v="Dica valiosa"><div class="card-ic">💡</div><div class="card-name">Dica</div></div>
+      <div class="card" data-v="Promoção ou oferta especial"><div class="card-ic">🔥</div><div class="card-name">Promoção</div></div>
+      <div class="card" data-v="Case de sucesso ou resultado comprovado"><div class="card-ic">🏆</div><div class="card-name">Case</div></div>
+      <div class="card" data-v="Depoimento de cliente satisfeito"><div class="card-ic">⭐</div><div class="card-name">Depoimento</div></div>
+      <div class="card" data-v="Apresentação detalhada do serviço"><div class="card-ic">📣</div><div class="card-name">Apresentação</div></div>
+      <div class="card" data-v="Conteúdo educativo que gera valor"><div class="card-ic">📚</div><div class="card-name">Educativo</div></div>
+    </div>
+  </div>
+  <div><div class="lbl">Tom de voz</div>
+    <div class="grid2" id="pTom">
+      <div class="card on-p" data-v="profissional e confiante, autoridade e credibilidade, linguagem clara"><div class="card-ic">👔</div><div class="card-name">Profissional</div><div class="card-sub">Autoridade</div></div>
+      <div class="card" data-v="descontraído e próximo, como um amigo, linguagem casual e leve"><div class="card-ic">😊</div><div class="card-name">Descontraído</div><div class="card-sub">Amigável</div></div>
+      <div class="card" data-v="urgente e persuasivo, senso de escassez, foco total em conversão"><div class="card-ic">⚡</div><div class="card-name">Urgente</div><div class="card-sub">Conversão</div></div>
+      <div class="card" data-v="inspiracional e motivacional, storytelling emocional, sonhos e aspirações"><div class="card-ic">✨</div><div class="card-name">Inspiracional</div><div class="card-sub">Emocional</div></div>
+      <div class="card" data-v="educativo e didático, explica conceitos de forma simples, posiciona como especialista"><div class="card-ic">🎓</div><div class="card-name">Educativo</div><div class="card-sub">Especialista</div></div>
+      <div class="card" data-v="divertido e bem-humorado, humor leve, referências culturais para engajar"><div class="card-ic">😂</div><div class="card-name">Divertido</div><div class="card-sub">Engajamento</div></div>
+    </div>
+  </div>
+  <div><div class="lbl">Formato</div>
+    <div class="fmt-row">
+      <div class="fmt-btn on" data-w="1024" data-h="1024" onclick="setFmt(this)"><div class="fmt-ic">⬛</div><div class="fmt-lbl">Quadrado</div><div class="fmt-sub">1080×1080</div></div>
+      <div class="fmt-btn" data-w="576" data-h="1024" onclick="setFmt(this)"><div class="fmt-ic">📱</div><div class="fmt-lbl">Reel / Story</div><div class="fmt-sub">1080×1920</div></div>
+    </div>
+  </div>
+  <div><div class="lbl">Estilo visual</div>
+    <div class="grid3" id="pEstilo">
+      <div class="card on-a" data-v="modern professional clean high-end photography"><div class="card-ic">🏙️</div><div class="card-name">Moderno</div></div>
+      <div class="card" data-v="bold minimalist stark contrasts typography-forward"><div class="card-ic">⬜</div><div class="card-name">Minimal</div></div>
+      <div class="card" data-v="warm cinematic golden hour lighting lifestyle photography"><div class="card-ic">🌅</div><div class="card-name">Cinemático</div></div>
+      <div class="card" data-v="vibrant colorful energetic Gen-Z aesthetic bold colors"><div class="card-ic">🎨</div><div class="card-name">Colorido</div></div>
+      <div class="card" data-v="dark luxury matte black premium brand aesthetics"><div class="card-ic">🖤</div><div class="card-name">Dark Lux</div></div>
+      <div class="card" data-v="clean flat design illustration vector art style"><div class="card-ic">✏️</div><div class="card-name">Ilustração</div></div>
+    </div>
+  </div>
+  <div><div class="lbl">Tema livre (opcional)</div>
+    <textarea class="inp" id="temaPost" rows="3" placeholder="Ex: como o bot responde clientes às 2h da manhã..."></textarea>
+  </div>
+  <button class="btn-gen" id="btnPost" onclick="gerarPost()"><span>✦</span><span>Gerar Post + Imagem</span></button>
+  <div class="prog-wrap" id="progPost"><div class="prog-lbl" id="progPostLbl">Gerando...</div><div class="prog-bg"><div class="prog-fill" id="progPostFill"></div></div></div>
+  <div class="erro" id="erroPost"></div>
+  <div class="res-wrap" id="resPost">
+    <div class="hr"></div>
+    <div class="img-res"><img id="imgPost" src="" alt=""><div class="img-ov"><a class="btn-dl" id="dlPost" download="post.jpg">⬇ Baixar</a></div></div>
+    <div class="txt-card"><div class="txt-hd"><span class="txt-title">📝 Legenda</span><button class="btn-cp" onclick="cp('lgPost')">Copiar</button></div><div class="txt-body" id="lgPost"></div></div>
+    <div class="txt-card"><div class="txt-hd"><span class="txt-title"># Hashtags</span><button class="btn-cp" onclick="cp('htPost')">Copiar</button></div><div class="htags" id="htPost"></div></div>
+    <button class="btn-all" onclick="cpTudoPost()">📋 Copiar legenda + hashtags</button>
+    <button class="btn-reset" onclick="resetPost()">↩ Novo post</button>
+  </div>
+</div>
+
+<!-- CARROSSEL -->
+<div class="panel" id="panel-carousel">
+  <div><div class="lbl">Nicho</div>
+    <div class="pills" id="cNicho">
+      <div class="pill on" data-v="Agente de Atendimento 24h por IA no WhatsApp">🤖 Atend. IA</div>
+      <div class="pill" data-v="Barbearia moderna">✂️ Barbearia</div>
+      <div class="pill" data-v="Salão de Beleza e Estética">💆 Beleza</div>
+      <div class="pill" data-v="Clínica Odontológica">🦷 Odonto</div>
+      <div class="pill" data-v="Restaurante">🍽️ Restaurante</div>
+      <div class="pill" data-v="Oficina Mecânica">🔧 Oficina</div>
+      <div class="pill" data-v="Imobiliária">🏠 Imobiliária</div>
+    </div>
+  </div>
+  <div><div class="lbl">Tom de voz</div>
+    <div class="grid2" id="cTom">
+      <div class="card on-p" data-v="profissional e confiante, autoridade e credibilidade, linguagem clara"><div class="card-ic">👔</div><div class="card-name">Profissional</div><div class="card-sub">Autoridade</div></div>
+      <div class="card" data-v="descontraído e próximo, como um amigo, linguagem casual e leve"><div class="card-ic">😊</div><div class="card-name">Descontraído</div><div class="card-sub">Amigável</div></div>
+      <div class="card" data-v="urgente e persuasivo, senso de escassez, foco total em conversão"><div class="card-ic">⚡</div><div class="card-name">Urgente</div><div class="card-sub">Conversão</div></div>
+      <div class="card" data-v="inspiracional e motivacional, storytelling emocional, sonhos e aspirações"><div class="card-ic">✨</div><div class="card-name">Inspiracional</div><div class="card-sub">Emocional</div></div>
+      <div class="card" data-v="educativo e didático, explica conceitos de forma simples, posiciona como especialista"><div class="card-ic">🎓</div><div class="card-name">Educativo</div><div class="card-sub">Especialista</div></div>
+      <div class="card" data-v="divertido e bem-humorado, humor leve, referências culturais para engajar"><div class="card-ic">😂</div><div class="card-name">Divertido</div><div class="card-sub">Engajamento</div></div>
+    </div>
+  </div>
+  <div><div class="lbl">Estilo visual</div>
+    <div class="grid3" id="cEstilo">
+      <div class="card on-a" data-v="modern professional clean high-end photography"><div class="card-ic">🏙️</div><div class="card-name">Moderno</div></div>
+      <div class="card" data-v="bold minimalist stark contrasts typography-forward"><div class="card-ic">⬜</div><div class="card-name">Minimal</div></div>
+      <div class="card" data-v="warm cinematic golden hour lighting lifestyle photography"><div class="card-ic">🌅</div><div class="card-name">Cinemático</div></div>
+      <div class="card" data-v="vibrant colorful energetic Gen-Z aesthetic bold colors"><div class="card-ic">🎨</div><div class="card-name">Colorido</div></div>
+      <div class="card" data-v="dark luxury matte black premium brand aesthetics"><div class="card-ic">🖤</div><div class="card-name">Dark Lux</div></div>
+      <div class="card" data-v="clean flat design illustration vector art style"><div class="card-ic">✏️</div><div class="card-name">Ilustração</div></div>
+    </div>
+  </div>
+  <div><div class="lbl">Tema do carrossel</div>
+    <textarea class="inp" id="temaCarousel" rows="3" placeholder="Ex: 5 motivos para ter um agente de IA no seu negócio..."></textarea>
+  </div>
+  <button class="btn-gen" id="btnCarousel" onclick="gerarCarousel()"><span>✦</span><span>Gerar Carrossel (6 slides)</span></button>
+  <div class="prog-wrap" id="progCarousel"><div class="prog-lbl" id="progCarouselLbl">Planejando...</div><div class="prog-bg"><div class="prog-fill" id="progCarouselFill"></div></div></div>
+  <div class="erro" id="erroCarousel"></div>
+  <div class="res-wrap" id="resCarousel">
+    <div class="hr"></div>
+    <div class="lbl" style="margin-bottom:6px">🎠 6 Slides — toque ⬇ para baixar</div>
+    <div class="cgrid" id="cgrid"></div>
+    <div class="txt-card"><div class="txt-hd"><span class="txt-title">📝 Legenda</span><button class="btn-cp" onclick="cp('lgCarousel')">Copiar</button></div><div class="txt-body" id="lgCarousel"></div></div>
+    <div class="txt-card"><div class="txt-hd"><span class="txt-title"># Hashtags</span><button class="btn-cp" onclick="cp('htCarousel')">Copiar</button></div><div class="htags" id="htCarousel"></div></div>
+    <button class="btn-all" onclick="cpTudoCarousel()">📋 Copiar legenda + hashtags</button>
+    <button class="btn-reset" onclick="resetCarousel()">↩ Novo carrossel</button>
+  </div>
+</div>
+
+</main>
+</div><!-- /appWrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIGURAÇÃO — troque para a URL do seu servidor
+// ══════════════════════════════════════════════
+const API = 'https://instapost.lorvix.com.br';
+
+// ── STATE ─────────────────────────────────────
+let token = localStorage.getItem('ip_token') || '';
+let currentUser = null;
+const proKeys = {
+  texto:  { provider: 'anthropic', key: '' },
+  imagem: { provider: 'replicate', key: '' }
+};
+const S = {
+  post:{nicho:'Agente de Atendimento 24h por IA no WhatsApp',tipo:'Dica valiosa',tom:'profissional e confiante, autoridade e credibilidade, linguagem clara',estilo:'modern professional clean high-end photography',fmt:{w:1024,h:1024},legenda:'',hashtags:[]},
+  carousel:{nicho:'Agente de Atendimento 24h por IA no WhatsApp',tom:'profissional e confiante, autoridade e credibilidade, linguagem clara',estilo:'modern professional clean high-end photography',legenda:'',hashtags:[]}
+};
+
+// ── LOGIN ──────────────────────────────────────
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn  = document.getElementById('loginBtn');
+  const err  = document.getElementById('loginErr');
+  if (!user || !pass) { err.textContent = 'Preencha usuário e senha.'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner" style="border-top-color:#000"></div>';
+  err.textContent = '';
+  try {
+    const r = await fetch(API + '/api/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ username: user, password: pass })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Credenciais inválidas.');
+    token = d.token;
+    localStorage.setItem('ip_token', token);
+    currentUser = d.user;
+    showApp();
+  } catch(e) {
+    err.textContent = e.message;
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<span>Entrar</span>';
+}
+
+function logout() {
+  token = ''; currentUser = null;
+  localStorage.removeItem('ip_token');
+  document.getElementById('appWrap').style.display = 'none';
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+async function initApp() {
+  if (!token) return;
+  try {
+    const r = await fetch(API + '/api/me', { headers: {'Authorization':'Bearer '+token} });
+    if (!r.ok) { logout(); return; }
+    currentUser = await r.json();
+    showApp();
+  } catch { logout(); }
+}
+
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appWrap').style.display = 'block';
+  const u = currentUser;
+  // Badge
+  const badge = document.getElementById('planBadge');
+  badge.textContent = u.plan;
+  badge.className = 'plan-badge ' + u.plan;
+  // Barra de uso (só basic)
+  if (u.plan === 'basic') {
+    document.getElementById('usoBar').style.display = 'flex';
+    document.getElementById('usoNum').textContent = u.usage;
+    document.getElementById('usoLim').textContent = u.limit;
+    const pct = Math.min(100, Math.round((u.usage / u.limit) * 100));
+    const fill = document.getElementById('usoFill');
+    fill.style.width = pct + '%';
+    if (pct >= 80) fill.classList.add('warn');
+  }
+  // Seção de chaves pro
+  if (u.plan === 'pro') {
+    document.getElementById('proKeysSection').classList.add('show');
+    loadProKeys();
+  }
+}
+
+// ── PRO KEYS ──────────────────────────────────
+function loadProKeys() {
+  ['texto','imagem'].forEach(t => {
+    const p = localStorage.getItem('pro_pvdr_'+t);
+    const k = localStorage.getItem('pro_key_'+t);
+    if (p) { proKeys[t].provider = p; setActivePvdr(t, p); }
+    if (k) { proKeys[t].key = k; showProKeyOk(t); }
+  });
+}
+function toggleProKeys() {
+  const body = document.getElementById('proKeysBody');
+  const chev = document.getElementById('proKeysChev');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'flex' : 'none';
+  chev.classList.toggle('open', open);
+}
+function setPvdr(tipo, p, el) {
+  document.getElementById('pvdr'+cap(tipo)).querySelectorAll('.pvdr-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on'); proKeys[tipo].provider = p;
+  localStorage.setItem('pro_pvdr_'+tipo, p);
+  proKeys[tipo].key = ''; localStorage.removeItem('pro_key_'+tipo);
+  document.getElementById('key'+cap(tipo)+'Area').style.display = '';
+  document.getElementById('key'+cap(tipo)+'Ok').style.display = 'none';
+}
+function setActivePvdr(tipo, p) {
+  document.getElementById('pvdr'+cap(tipo))?.querySelectorAll('.pvdr-btn').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+}
+function salvarProKey(tipo) {
+  const v = document.getElementById('key'+cap(tipo)+'Inp').value.trim();
+  if (!v) return;
+  proKeys[tipo].key = v; localStorage.setItem('pro_key_'+tipo, v);
+  showProKeyOk(tipo); showToast('Key salva ✓');
+}
+function showProKeyOk(tipo) {
+  document.getElementById('key'+cap(tipo)+'Area').style.display = 'none';
+  document.getElementById('key'+cap(tipo)+'Ok').style.display = '';
+  const labels = {anthropic:'Claude',openai:'GPT-4o',google:'Gemini',replicate:'Replicate',openai_img:'DALL-E 3'};
+  document.getElementById('key'+cap(tipo)+'OkTxt').textContent = '✓ ' + (labels[proKeys[tipo].provider]||'Key') + ' configurada';
+}
+function limparProKey(tipo) {
+  proKeys[tipo].key = ''; localStorage.removeItem('pro_key_'+tipo);
+  document.getElementById('key'+cap(tipo)+'Inp').value = '';
+  document.getElementById('key'+cap(tipo)+'Area').style.display = '';
+  document.getElementById('key'+cap(tipo)+'Ok').style.display = 'none';
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+// ── TABS & SELECTIONS ──────────────────────────
+function setTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',(i===0&&t==='post')||(i===1&&t==='carousel')));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('panel-'+t).classList.add('on');
+}
+function initSel(id,obj,key,cls){
+  document.getElementById(id).querySelectorAll('[data-v]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      document.getElementById(id).querySelectorAll('[data-v]').forEach(x=>x.className=x.className.replace(/on-\w+/g,'').trim());
+      el.classList.add(cls); obj[key]=el.dataset.v;
+    });
+  });
+}
+initSel('pNicho',S.post,'nicho','on'); initSel('pTipo',S.post,'tipo','on-o');
+initSel('pTom',S.post,'tom','on-p'); initSel('pEstilo',S.post,'estilo','on-a');
+initSel('cNicho',S.carousel,'nicho','on'); initSel('cTom',S.carousel,'tom','on-p');
+initSel('cEstilo',S.carousel,'estilo','on-a');
+function setFmt(el){document.querySelectorAll('.fmt-btn').forEach(x=>x.classList.remove('on'));el.classList.add('on');S.post.fmt={w:parseInt(el.dataset.w),h:parseInt(el.dataset.h)};}
+
+// ── PROGRESS ──────────────────────────────────
+function setProg(id,pct,lbl){document.getElementById('prog'+id).classList.add('on');document.getElementById('prog'+id+'Fill').style.width=pct+'%';document.getElementById('prog'+id+'Lbl').textContent=lbl;}
+function hideProg(id){document.getElementById('prog'+id).classList.remove('on');}
+
+// ── API CALLS ──────────────────────────────────
+async function apiText(prompt, provider) {
+  const body = { prompt, provider: provider || proKeys.texto.provider };
+  if (currentUser.plan === 'pro' && proKeys.texto.key) body.userKey = proKeys.texto.key;
+  const r = await fetch(API+'/api/text', {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error||'Erro no servidor');
+  return JSON.parse(d.result.replace(/```json|```/g,'').trim());
+}
+
+async function apiImage(prompt, w, h) {
+  const body = { prompt, width:w, height:h, provider: proKeys.imagem.provider };
+  if (currentUser.plan === 'pro' && proKeys.imagem.key) body.userKey = proKeys.imagem.key;
+  const r = await fetch(API+'/api/image', {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error||'Erro no servidor');
+  return d.url;
+}
+
+// ── GERAR POST ─────────────────────────────────
+async function gerarPost(){
+  const tema=document.getElementById('temaPost').value.trim();
+  const btn=document.getElementById('btnPost');
+  document.getElementById('erroPost').classList.remove('on');
+  document.getElementById('resPost').classList.remove('on');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div><span>Gerando...</span>';
+  try{
+    setProg('Post',15,'✦ Criando legenda...');
+    const json=await apiText(`Especialista em marketing digital para Instagram.
+Crie conteúdo:
+- Nicho: ${S.post.nicho}
+- Tipo: ${S.post.tipo}
+- Tom: ${S.post.tom}
+${tema?'- Tema: '+tema:''}
+Retorne APENAS JSON puro sem markdown:
+{"legenda":"legenda português emojis gancho forte valor real CTA. Tom: ${S.post.tom}. Máx 280 palavras.","hashtags":["20 hashtags sem #"],"image_prompt":"prompt inglês para imagem IA estilo: ${S.post.estilo}. Cena impactante nicho e tema. SEM texto na imagem. Fotorrealista ultra detalhado."}`);
+    S.post.legenda=json.legenda; S.post.hashtags=json.hashtags;
+    setProg('Post',45,'🎨 Gerando imagem...');
+    const url=await apiImage(json.image_prompt,S.post.fmt.w,S.post.fmt.h);
+    document.getElementById('imgPost').src=url;
+    document.getElementById('dlPost').href=url;
+    document.getElementById('lgPost').textContent=json.legenda;
+    renderHtags('htPost',json.hashtags);
+    // Atualiza uso
+    if(currentUser.plan==='basic'){
+      currentUser.usage++;
+      document.getElementById('usoNum').textContent=currentUser.usage;
+      const pct=Math.min(100,Math.round((currentUser.usage/currentUser.limit)*100));
+      const fill=document.getElementById('usoFill');
+      fill.style.width=pct+'%';
+      if(pct>=80)fill.classList.add('warn');
+    }
+    hideProg('Post');
+    document.getElementById('resPost').classList.add('on');
+    document.getElementById('resPost').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){hideProg('Post');showErro('erroPost',e.message);}
+  btn.disabled=false; btn.innerHTML='<span>✦</span><span>Gerar Post + Imagem</span>';
+}
+
+// ── GERAR CARROSSEL ────────────────────────────
+async function gerarCarousel(){
+  const tema=document.getElementById('temaCarousel').value.trim();
+  if(!tema){showErro('erroCarousel','Digite um tema para o carrossel.');return;}
+  const btn=document.getElementById('btnCarousel');
+  document.getElementById('erroCarousel').classList.remove('on');
+  document.getElementById('resCarousel').classList.remove('on');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div><span>Gerando...</span>';
+  try{
+    setProg('Carousel',10,'✦ Planejando slides...');
+    const json=await apiText(`Especialista em marketing Instagram.
+Crie carrossel 6 slides:
+- Nicho: ${S.carousel.nicho}
+- Tema: ${tema}
+- Tom: ${S.carousel.tom}
+Retorne APENAS JSON puro sem markdown:
+{"slides":[{"titulo":"título impactante máx 8 palavras","texto":"apoio máx 18 palavras","image_prompt":"prompt inglês estilo: ${S.carousel.estilo}. Cena slide. SEM texto. Ultra qualidade."}],"legenda":"legenda carrossel tom: ${S.carousel.tom}, gancho, valor, CTA. Máx 280 palavras.","hashtags":["20 hashtags sem #"]}`);
+    S.carousel.legenda=json.legenda; S.carousel.hashtags=json.hashtags;
+    const grid=document.getElementById('cgrid'); grid.innerHTML='';
+    json.slides.forEach((_,i)=>{const d=document.createElement('div');d.className='cslide';d.id='sl-'+i;d.innerHTML='<div class="cload"><div class="cspinner"></div></div>';grid.appendChild(d);});
+    document.getElementById('lgCarousel').textContent=json.legenda;
+    renderHtags('htCarousel',json.hashtags);
+    document.getElementById('resCarousel').classList.add('on');
+    document.getElementById('resCarousel').scrollIntoView({behavior:'smooth',block:'start'});
+    for(let i=0;i<json.slides.length;i+=3){
+      setProg('Carousel',20+Math.round((i/json.slides.length)*70),`🎨 Imagens ${i+1}–${Math.min(i+3,json.slides.length)} de ${json.slides.length}...`);
+      await Promise.all(json.slides.slice(i,i+3).map(async(slide,idx)=>{
+        const ri=i+idx;
+        try{const url=await apiImage(slide.image_prompt,1024,1024);renderSlide(ri,slide,url);}
+        catch{renderSlideErr(ri);}
+      }));
+    }
+    hideProg('Carousel');
+  }catch(e){hideProg('Carousel');showErro('erroCarousel',e.message);}
+  btn.disabled=false; btn.innerHTML='<span>✦</span><span>Gerar Carrossel (6 slides)</span>';
+}
+
+function renderSlide(idx,slide,url){document.getElementById('sl-'+idx).innerHTML=`<img src="${url}" loading="lazy"><div class="cnum">${idx+1}/6</div><a class="cdl" href="${url}" download="slide-${idx+1}.jpg" target="_blank">⬇</a><div style="position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.88))"><div style="font-family:'Syne',sans-serif;font-size:.68rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:2px">${slide.titulo}</div><div style="font-size:.58rem;color:rgba(255,255,255,.65);line-height:1.3">${slide.texto}</div></div>`;}
+function renderSlideErr(idx){document.getElementById('sl-'+idx).innerHTML=`<div class="cload" style="flex-direction:column;gap:5px"><span>⚠️</span><span style="font-size:.63rem;color:var(--t3)">Erro slide ${idx+1}</span></div>`;}
+
+// ── HELPERS ────────────────────────────────────
+function renderHtags(id,arr){const el=document.getElementById(id);el.innerHTML='';arr.forEach(h=>{const t=document.createElement('span');t.className='htag';t.textContent='#'+h.replace(/^#/,'');el.appendChild(t);});}
+function showErro(id,msg){const e=document.getElementById(id);e.textContent='⚠️ '+msg;e.classList.add('on');}
+function cp(id){let txt='';if(id==='htPost')txt=S.post.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ');else if(id==='htCarousel')txt=S.carousel.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ');else txt=document.getElementById(id).textContent;navigator.clipboard.writeText(txt).then(()=>showToast('Copiado ✓'));}
+function cpTudoPost(){navigator.clipboard.writeText(S.post.legenda+'\n\n'+S.post.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ')).then(()=>showToast('Tudo copiado ✓'));}
+function cpTudoCarousel(){navigator.clipboard.writeText(S.carousel.legenda+'\n\n'+S.carousel.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ')).then(()=>showToast('Tudo copiado ✓'));}
+function resetPost(){document.getElementById('resPost').classList.remove('on');document.getElementById('temaPost').value='';window.scrollTo({top:0,behavior:'smooth'});}
+function resetCarousel(){document.getElementById('resCarousel').classList.remove('on');document.getElementById('temaCarousel').value='';window.scrollTo({top:0,behavior:'smooth'});}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
+
+
+function showBox(id) {
+  ['boxLogin','boxRegister','boxForgot','boxReset'].forEach(b => {
+    document.getElementById(b).style.display = b === id ? '' : 'none';
+  });
+  // clear errors
+  ['loginErr','regErr','fgErr','resetErr'].forEach(e => { const el=document.getElementById(e); if(el) el.textContent=''; });
+}
+
+async function doRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const user  = document.getElementById('regUser').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  const btn   = document.getElementById('regBtn');
+  const err   = document.getElementById('regErr');
+  if (!name||!user||!email||!pass) { err.textContent='Preencha todos os campos.'; return; }
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="border-top-color:#000"></div>';
+  err.textContent='';
+  try {
+    const r = await fetch(API+'/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,username:user,email,password:pass})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Erro ao cadastrar.');
+    token=d.token; localStorage.setItem('ip_token',token); currentUser=d.user;
+    showApp();
+  } catch(e) { err.textContent=e.message; }
+  btn.disabled=false; btn.innerHTML='<span>Criar conta</span>';
+}
+
+async function doForgotVerify() {
+  const user  = document.getElementById('fgUser').value.trim();
+  const email = document.getElementById('fgEmail').value.trim();
+  const btn   = document.getElementById('fgBtn');
+  const err   = document.getElementById('fgErr');
+  if (!user||!email) { err.textContent='Preencha usuário e e-mail.'; return; }
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="border-top-color:#000"></div>';
+  err.textContent='';
+  try {
+    const r = await fetch(API+'/api/forgot/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,email})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Erro na verificação.');
+    document.getElementById('resetUserId').value = d.userId;
+    showBox('boxReset');
+  } catch(e) { err.textContent=e.message; }
+  btn.disabled=false; btn.innerHTML='<span>Verificar</span>';
+}
+
+async function doReset() {
+  const userId = document.getElementById('resetUserId').value;
+  const pass1  = document.getElementById('resetPass').value;
+  const pass2  = document.getElementById('resetPass2').value;
+  const btn    = document.getElementById('resetBtn');
+  const err    = document.getElementById('resetErr');
+  if (!pass1) { err.textContent='Digite a nova senha.'; return; }
+  if (pass1 !== pass2) { err.textContent='As senhas não coincidem.'; return; }
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="border-top-color:#000"></div>';
+  err.textContent='';
+  try {
+    const r = await fetch(API+'/api/forgot/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId,newPassword:pass1})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Erro ao redefinir.');
+    token=d.token; localStorage.setItem('ip_token',token); currentUser=d.user;
+    showApp();
+  } catch(e) { err.textContent=e.message; }
+  btn.disabled=false; btn.innerHTML='<span>Salvar nova senha</span>';
+}
+
+initApp();
+</script>
+</body>
+</html>
