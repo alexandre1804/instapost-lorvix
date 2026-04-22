@@ -172,6 +172,8 @@ const S = {
 - [x] Plano Pro: usuário conecta chave própria de texto e imagem
 - [x] Barra de uso mensal (plano basic)
 - [x] Painel admin via `/api/admin/stats`
+- [x] Campo livre de nicho (texto livre, sem pills fixas)
+- [x] Carrossel: seletor de quantidade de slides (3, 5, 7 ou 10)
 
 ---
 
@@ -213,6 +215,21 @@ cat /var/www/instapost/usage.json
 # Verificar sintaxe do server.js antes de reiniciar
 node --check /var/www/instapost/server.js
 ```
+
+---
+
+## Fluxo de Deploy
+
+Após qualquer alteração, seguir este fluxo:
+
+1. Desenvolver na branch de feature (ex: `claude/nome-da-feature`)
+2. Criar PR apontando para `main` e fazer o merge
+3. Alexandre atualiza a VPS manualmente:
+   ```bash
+   cd /var/www/instapost && git stash && git pull && pm2 restart instapost
+   ```
+
+**Claude faz os passos 1 e 2. Alexandre cuida do passo 3.**
 
 ---
 
