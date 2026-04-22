@@ -1,0 +1,16 @@
+# Dependências
+node_modules/
+
+# Variáveis de ambiente (contém chaves e senhas — NUNCA subir)
+.env
+
+# Dados de uso dos usuários
+usage.json
+
+# Logs
+*.log
+logs/
+
+# Sistema
+.DS_Store
+Thumbs.db
