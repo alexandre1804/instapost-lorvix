@@ -272,3 +272,99 @@ main{padding:16px 18px;display:flex;flex-direction:column;gap:0}
         <div class="pvdr-btn" data-p="openai" onclick="setPvdr('texto','openai',this)">⚫ GPT-4o</div>
         <div class="pvdr-btn" data-p="google" onclick="setPvdr('texto','google',this)">🔵 Gemini</div>
       </div>
+@@ -714,50 +743,63 @@ Retorne APENAS JSON puro sem markdown com exatamente ${numSlides} slides:
+      setProg('Carousel',20+Math.round((i/json.slides.length)*70),`🎨 Imagens ${i+1}–${Math.min(i+3,json.slides.length)} de ${json.slides.length}...`);
+      await Promise.all(json.slides.slice(i,i+3).map(async(slide,idx)=>{
+        const ri=i+idx;
+        try{const url=await apiImage(slide.image_prompt,1024,1024);renderSlide(ri,slide,url,json.slides.length);}
+        catch{renderSlideErr(ri);}
+      }));
+    }
+    hideProg('Carousel');
+  }catch(e){hideProg('Carousel');showErro('erroCarousel',e.message);}
+  btn.disabled=false; btn.innerHTML='<span>✦</span><span id="btnCarouselLabel">Gerar Carrossel ('+S.carousel.slides+' slides)</span>';
+}
+
+function renderSlide(idx,slide,url,total){document.getElementById('sl-'+idx).innerHTML=`<img src="${url}" loading="lazy"><div class="cnum">${idx+1}/${total}</div><a class="cdl" href="${url}" download="slide-${idx+1}.jpg" target="_blank">⬇</a><div style="position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.88))"><div style="font-family:'Syne',sans-serif;font-size:.68rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:2px">${slide.titulo}</div><div style="font-size:.58rem;color:rgba(255,255,255,.65);line-height:1.3">${slide.texto}</div></div>`;}
+function renderSlideErr(idx){document.getElementById('sl-'+idx).innerHTML=`<div class="cload" style="flex-direction:column;gap:5px"><span>⚠️</span><span style="font-size:.63rem;color:var(--t3)">Erro slide ${idx+1}</span></div>`;}
+
+// ── HELPERS ────────────────────────────────────
+function renderHtags(id,arr){const el=document.getElementById(id);el.innerHTML='';arr.forEach(h=>{const t=document.createElement('span');t.className='htag';t.textContent='#'+h.replace(/^#/,'');el.appendChild(t);});}
+function showErro(id,msg){const e=document.getElementById(id);e.textContent='⚠️ '+msg;e.classList.add('on');}
+function cp(id){let txt='';if(id==='htPost')txt=S.post.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ');else if(id==='htCarousel')txt=S.carousel.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ');else txt=document.getElementById(id).textContent;navigator.clipboard.writeText(txt).then(()=>showToast('Copiado ✓'));}
+function cpTudoPost(){navigator.clipboard.writeText(S.post.legenda+'\n\n'+S.post.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ')).then(()=>showToast('Tudo copiado ✓'));}
+function cpTudoCarousel(){navigator.clipboard.writeText(S.carousel.legenda+'\n\n'+S.carousel.hashtags.map(h=>'#'+h.replace(/^#/,'')).join(' ')).then(()=>showToast('Tudo copiado ✓'));}
+function resetPost(){document.getElementById('resPost').classList.remove('on');document.getElementById('pNichoInp').value='';document.getElementById('temaPost').value='';document.getElementById('imgPromptPost').value='';window.scrollTo({top:0,behavior:'smooth'});}
+function resetCarousel(){document.getElementById('resCarousel').classList.remove('on');document.getElementById('cNichoInp').value='';document.getElementById('temaCarousel').value='';document.getElementById('imgPromptCarousel').value='';window.scrollTo({top:0,behavior:'smooth'});}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
+
+function cleanupInjectedDiffArtifacts() {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const toRemove = [];
+  while (walker.nextNode()) {
+    const txt = (walker.currentNode.textContent || '').trim();
+    if (!txt) continue;
+    // Remove accidental diff/debug text that can be injected by bad manual edits.
+    if (/^@@\s*-\d+,\d+\s*\+\d+,\d+\s*@@/.test(txt) || txt.includes('main{padding:16px 18px;display:flex;flex-direction:column;gap:0}')) {
+      toRemove.push(walker.currentNode);
+    }
+  }
+  toRemove.forEach(n => n.remove());
+}
+
+function showBox(id) {
+  ['boxLogin','boxRegister','boxForgot','boxReset'].forEach(b => {
+    document.getElementById(b).style.display = b === id ? '' : 'none';
+  });
+  // clear errors
+  ['loginErr','regErr','fgErr','resetErr'].forEach(e => { const el=document.getElementById(e); if(el) el.textContent=''; });
+}
+
+async function doRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const user  = document.getElementById('regUser').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  const btn   = document.getElementById('regBtn');
+  const err   = document.getElementById('regErr');
+  if (!name||!user||!email||!pass) { err.textContent='Preencha todos os campos.'; return; }
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="border-top-color:#000"></div>';
+  err.textContent='';
+  try {
+    const r = await fetch(API+'/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,username:user,email,password:pass})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Erro ao cadastrar.');
+    token=d.token; localStorage.setItem('ip_token',token); currentUser=d.user;
+    showApp();
+@@ -781,29 +823,31 @@ async function doForgotVerify() {
+    showBox('boxReset');
+  } catch(e) { err.textContent=e.message; }
+  btn.disabled=false; btn.innerHTML='<span>Verificar</span>';
+}
+
+async function doReset() {
+  const userId = document.getElementById('resetUserId').value;
+  const pass1  = document.getElementById('resetPass').value;
+  const pass2  = document.getElementById('resetPass2').value;
+  const btn    = document.getElementById('resetBtn');
+  const err    = document.getElementById('resetErr');
+  if (!pass1) { err.textContent='Digite a nova senha.'; return; }
+  if (pass1 !== pass2) { err.textContent='As senhas não coincidem.'; return; }
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="border-top-color:#000"></div>';
+  err.textContent='';
+  try {
+    const r = await fetch(API+'/api/forgot/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId,newPassword:pass1})});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Erro ao redefinir.');
+    token=d.token; localStorage.setItem('ip_token',token); currentUser=d.user;
+    showApp();
+  } catch(e) { err.textContent=e.message; }
+  btn.disabled=false; btn.innerHTML='<span>Salvar nova senha</span>';
+}
+
+cleanupInjectedDiffArtifacts();
+showBox('boxLogin');
+initApp();
+</script>
+</body>
+</html>
