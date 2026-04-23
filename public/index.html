@@ -272,7 +272,7 @@ main{padding:16px 18px;display:flex;flex-direction:column;gap:0}
         <div class="pvdr-btn" data-p="openai" onclick="setPvdr('texto','openai',this)">⚫ GPT-4o</div>
         <div class="pvdr-btn" data-p="google" onclick="setPvdr('texto','google',this)">🔵 Gemini</div>
       </div>
-@@ -714,50 +743,63 @@ Retorne APENAS JSON puro sem markdown com exatamente ${numSlides} slides:
+@@ -714,50 +743,75 @@ Retorne APENAS JSON puro sem markdown com exatamente ${numSlides} slides:
       setProg('Carousel',20+Math.round((i/json.slides.length)*70),`🎨 Imagens ${i+1}–${Math.min(i+3,json.slides.length)} de ${json.slides.length}...`);
       await Promise.all(json.slides.slice(i,i+3).map(async(slide,idx)=>{
         const ri=i+idx;
@@ -299,17 +299,29 @@ function resetCarousel(){document.getElementById('resCarousel').classList.remove
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);}
 
 function cleanupInjectedDiffArtifacts() {
+  const suspicious = ['@@ -', '@@ +', 'main{padding:', 'display:flex;flex-direction:column;gap:0}'];
+  const shouldRemove = (txt='') => suspicious.some(s => txt.includes(s));
+
+  // Remove text nodes with diff/debug artifacts.
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  const toRemove = [];
+  const textNodes = [];
   while (walker.nextNode()) {
     const txt = (walker.currentNode.textContent || '').trim();
-    if (!txt) continue;
-    // Remove accidental diff/debug text that can be injected by bad manual edits.
-    if (/^@@\s*-\d+,\d+\s*\+\d+,\d+\s*@@/.test(txt) || txt.includes('main{padding:16px 18px;display:flex;flex-direction:column;gap:0}')) {
-      toRemove.push(walker.currentNode);
-    }
+    if (txt && shouldRemove(txt)) textNodes.push(walker.currentNode);
   }
-  toRemove.forEach(n => n.remove());
+  textNodes.forEach(n => n.remove());
+
+  // Remove entire elements if the artifact was inserted as innerHTML.
+  document.querySelectorAll('*').forEach(el => {
+    if (el.children.length) return;
+    const txt = (el.textContent || '').trim();
+    if (txt && shouldRemove(txt)) el.remove();
+  });
+}
+
+function watchInjectedDiffArtifacts() {
+  const obs = new MutationObserver(() => cleanupInjectedDiffArtifacts());
+  obs.observe(document.body, { childList: true, subtree: true, characterData: true });
 }
 
 function showBox(id) {
@@ -336,7 +348,7 @@ async function doRegister() {
     if (!r.ok) throw new Error(d.error||'Erro ao cadastrar.');
     token=d.token; localStorage.setItem('ip_token',token); currentUser=d.user;
     showApp();
-@@ -781,29 +823,31 @@ async function doForgotVerify() {
+@@ -781,29 +835,32 @@ async function doForgotVerify() {
     showBox('boxReset');
   } catch(e) { err.textContent=e.message; }
   btn.disabled=false; btn.innerHTML='<span>Verificar</span>';
@@ -363,6 +375,7 @@ async function doReset() {
 }
 
 cleanupInjectedDiffArtifacts();
+watchInjectedDiffArtifacts();
 showBox('boxLogin');
 initApp();
 </script>
